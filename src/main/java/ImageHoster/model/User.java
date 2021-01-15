@@ -3,6 +3,7 @@ package ImageHoster.model;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 //@Entity annotation specifies that the corresponding class is a JPA entity
 @Entity
@@ -33,6 +34,18 @@ public class User {
     @JoinColumn(name = "profile_id")
     private UserProfile profile;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 
     //The 'users' table is referenced by the 'images' table
     //The table (primary key) is referenced by the 'user' field in the 'images' table
