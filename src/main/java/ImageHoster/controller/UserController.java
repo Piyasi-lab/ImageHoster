@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -40,9 +41,34 @@ public class UserController {
     //This controller method is called when the request pattern is of type 'users/registration' and also the incoming request is of POST type
     //This method calls the business logic and after the user record is persisted in the database, directs to login page
     @RequestMapping(value = "users/registration", method = RequestMethod.POST)
-    public String registerUser(User user) {
-        userService.registerUser(user);
-        return "redirect:/users/login";
+    public String registerUser(User user, RedirectAttributes redirectAttributes) {
+        //if password is valid then register user
+        //else display error
+        if (isValidPassword(user.getPassword())) {
+            userService.registerUser(user);
+            return "redirect:/users/login";
+        } else {
+
+            redirectAttributes.addFlashAttribute("passwordTypeError", true);
+            return "redirect:/users/registration";
+
+        }
+
+    }
+    private boolean isValidPassword(String password){
+        boolean alphabetFound = false;
+        boolean numberFound = false;
+        boolean specialCharFound = false;
+        for ( char c:password.toCharArray()){
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')){
+                alphabetFound = true;
+            } else if (c >= '0' && c <= '9') {
+                numberFound = true;
+            } else {
+                specialCharFound = true;
+            }
+        }
+        return alphabetFound && numberFound && specialCharFound;
     }
 
     //This controller method is called when the request pattern is of type 'users/login'
