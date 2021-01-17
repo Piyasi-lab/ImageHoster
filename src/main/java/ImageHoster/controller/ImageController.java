@@ -48,6 +48,10 @@ public class ImageController {
     @RequestMapping(value = "/image/{imageId}/comments", method = RequestMethod.POST)
     public String newComment(@PathVariable("imageId") int imageId, String comment, HttpSession session) {
         Image image = imageService.getImage(imageId);
+        // redirect to images page if image not found
+        if(null == image) {
+            return "redirect:/images";
+        }
         Comment newComment = new Comment();
         newComment.setText(comment);
         newComment.setCreatedDate(LocalDate.now());

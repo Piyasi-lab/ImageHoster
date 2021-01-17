@@ -39,7 +39,8 @@ public class ImageControllerTest {
     @MockBean
     private TagService tagService;
 
-    //This test checks the controller logic to get all the images after the user is logged in the application and checks whether the logic returns the html file 'images.html'
+    //This test checks the controller logic to get all the images after the user
+    // is logged in the application and checks whether the logic returns the html file 'images.html'
     @Test
     public void getUserImages() throws Exception {
         User user = new User();
@@ -96,7 +97,9 @@ public class ImageControllerTest {
     }
 
 
-    //This test checks the controller logic when the logged in user sends a GET request to the server to get the form to upload an image in the application and checks whether the logic returns the html file 'images/upload.html'
+    //This test checks the controller logic when the logged in user sends a GET request
+    // to the server to get the form to upload an image in the application and checks whether
+    // the logic returns the html file 'images/upload.html'
     @Test
     public void uploadImageWithGetRequest() throws Exception {
         User user = new User();
@@ -119,7 +122,8 @@ public class ImageControllerTest {
     }
 
 
-    //This test checks the controller logic when the logged in submits the image to be uploaded in the application and checks whether the logic returns the html file 'images.html'
+    //This test checks the controller logic when the logged in submits the image
+    // to be uploaded in the application and checks whether the logic returns the html file 'images.html'
     @Test
     public void uploadImageWithPostRequest() throws Exception {
         User user = new User();
@@ -151,7 +155,9 @@ public class ImageControllerTest {
                 .andExpect(redirectedUrl("/images"));
     }
 
-    //This test checks the controller logic when the owner of the image sends the GET request to get the form to edit the image and checks whether the logic returns the html file 'images/edit.html'
+    //This test checks the controller logic when the owner of the image sends
+    // the GET request to get the form to edit the image and checks whether
+    // the logic returns the html file 'images/edit.html'
     @Test
     public void editImageWithOwnerOfTheImage() throws Exception {
         User user = new User();
@@ -192,7 +198,9 @@ public class ImageControllerTest {
     }
 
 
-    //This test checks the controller logic when non owner of the image sends the GET request to get the form to edit the image and checks whether the Model type object contains the desired attribute with desired value
+    //This test checks the controller logic when non owner of the image sends the GET request
+    // to get the form to edit the image and checks whether the Model type object contains
+    // the desired attribute with desired value
     @Test
     public void editImageWithNonOwnerOfTheImage() throws Exception {
         User user = new User();
@@ -234,7 +242,8 @@ public class ImageControllerTest {
                 .andExpect(flash().attribute("editError", true));
     }
 
-    //This test checks the controller logic when the owner of the image sends the DELETE request to delete the image and checks whether the logic returns the html file 'images.html'
+    //This test checks the controller logic when the owner of the image sends the DELETE request
+    // to delete the image and checks whether the logic returns the html file 'images.html'
     @Test
     public void deleteImageWithOwnerOfTheImage() throws Exception {
         User user = new User();
@@ -266,7 +275,9 @@ public class ImageControllerTest {
     }
 
 
-    //This test checks the controller logic when non owner of the image sends the DELETE request to delete the image and checks whether the Model type object contains the desired attribute with desired value
+    //This test checks the controller logic when non owner of the image sends the DELETE request
+    // to delete the image and checks whether the Model type object contains the desired attribute
+    // with desired value
     @Test
     public void deleteImageWithNonOwnerOfTheImage() throws Exception {
         User user = new User();
@@ -308,4 +319,127 @@ public class ImageControllerTest {
                 .session(session))
                 .andExpect(flash().attribute("deleteError", true));
     }
+
+    @Test
+    public void shouldBeAbleToAddCommentToOwnExistingImage() throws Exception {
+        // Given
+        User prerna = new User();
+        UserProfile prernaProfile = new UserProfile();
+        prernaProfile.setId(2);
+        prernaProfile.setEmailAddress("p@gmail.com");
+        prernaProfile.setFullName("Prerna");
+        prernaProfile.setMobileNumber("9876543210");
+        prerna.setProfile(prernaProfile);
+        prerna.setId(2);
+        prerna.setUsername("Prerna");
+        prerna.setPassword("password1@@");
+
+        Image image = new Image();
+        image.setId(1);
+        image.setTitle("new");
+        image.setDescription("This image is for testing purpose");
+        image.setUser(prerna);
+
+        session = new MockHttpSession();
+        session.setAttribute("loggeduser", prerna);
+
+        //When
+        Mockito.when(imageService.getImage(Mockito.anyInt())).thenReturn(image);
+        Mockito.doNothing().when(imageService).updateImage(image);
+
+
+        this.mockMvc.perform(post("/image/1/comments")
+                .flashAttr("comment", "This is a comment")
+                .session(session))
+        // Then
+                .andExpect(redirectedUrl("/images/1"));
+
+        Mockito.verify(imageService, Mockito.atLeastOnce()).updateImage(image);
+
+    }
+
+    @Test
+    public void shouldBeAbleToAddCommentToSomeOneElsesExistingImage() throws Exception {
+        // Given
+
+        User abhi = new User();
+        UserProfile abhiProfile = new UserProfile();
+        abhiProfile.setId(1);
+        abhiProfile.setEmailAddress("a@gmail.com");
+        abhiProfile.setFullName("Abhi Mahajan");
+        abhiProfile.setMobileNumber("9876543210");
+        abhi.setProfile(abhiProfile);
+        abhi.setId(1);
+        abhi.setUsername("Abhi");
+        abhi.setPassword("password1@");
+
+        User prerna = new User();
+        UserProfile prernaProfile = new UserProfile();
+        prernaProfile.setId(2);
+        prernaProfile.setEmailAddress("p@gmail.com");
+        prernaProfile.setFullName("Prerna");
+        prernaProfile.setMobileNumber("9876543210");
+        prerna.setProfile(prernaProfile);
+        prerna.setId(2);
+        prerna.setUsername("Prerna");
+        prerna.setPassword("password1@@");
+
+        Image image = new Image();
+        image.setId(1);
+        image.setTitle("new");
+        image.setDescription("This image is for testing purpose");
+        image.setUser(abhi);
+
+        session = new MockHttpSession();
+        session.setAttribute("loggeduser", prerna);
+
+        //When
+        Mockito.when(imageService.getImage(Mockito.anyInt())).thenReturn(image);
+        Mockito.doNothing().when(imageService).updateImage(image);
+
+
+        this.mockMvc.perform(post("/image/1/comments")
+                .flashAttr("comment", "This is a comment")
+                .session(session))
+                // Then
+                .andExpect(redirectedUrl("/images/1"));
+
+        Mockito.verify(imageService, Mockito.atLeastOnce()).updateImage(image);
+
+    }
+
+    @Test
+    public void shouldRedirectToImageWhenImageNotFound() throws Exception {
+        // Given
+        User prerna = new User();
+        UserProfile prernaProfile = new UserProfile();
+        prernaProfile.setId(2);
+        prernaProfile.setEmailAddress("p@gmail.com");
+        prernaProfile.setFullName("Prerna");
+        prernaProfile.setMobileNumber("9876543210");
+        prerna.setProfile(prernaProfile);
+        prerna.setId(2);
+        prerna.setUsername("Prerna");
+        prerna.setPassword("password1@@");
+
+        Image image = new Image();
+        image.setId(1);
+        image.setTitle("new");
+        image.setDescription("This image is for testing purpose");
+        image.setUser(prerna);
+
+        session = new MockHttpSession();
+        session.setAttribute("loggeduser", prerna);
+
+        //When
+        Mockito.when(imageService.getImage(Mockito.anyInt())).thenReturn(null);
+
+        this.mockMvc.perform(post("/image/1/comments")
+                .flashAttr("comment", "This is a comment")
+                .session(session))
+                // Then
+                .andExpect(redirectedUrl("/images"));
+
+    }
+
 }
