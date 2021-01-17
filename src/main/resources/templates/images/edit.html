@@ -11,7 +11,7 @@
 
     <div>Image Title :</div>
     <div>
-        <input type="text" name="title" size="70" th:value="${image.title}"/>
+        <input type="text" name="title" size="70" th:value="${image.title}" required/>
     </div>
 
     <br>
@@ -23,14 +23,14 @@
     <br>
     <div>
         <label for="file">Edit File</label>
-        <input type="file" name="file" id="file"/>
+        <input type="file" name="file" id="file" required/>
     </div>
 
     <!-- The code provides an option to edit the tags of an image and also displays the previous assigned tags to an image-->
     <br>
     <div>
         <label for="tags">Edit Tags</label>
-        <textarea type="text" name="tags" id="tags" th:text="${tags}"></textarea>
+        <textarea type="text" name="tags" id="tags" th:text="${tags}" required></textarea>
         <p>Multiple tags are allowed. Please separate tags by "," such as labrador,dog,yellow </p>
     </div>
 

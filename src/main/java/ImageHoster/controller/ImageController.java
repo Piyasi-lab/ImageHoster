@@ -128,9 +128,9 @@ public class ImageController {
         // if currently logged in user is the image.getUser then
         User currentUser = (User) session.getAttribute("loggeduser");
         if(image.getUser().equals(currentUser)) {
-            //String tags = convertTagsToString(image.getTags());
+            String tags = convertTagsToString(image.getTags());
             model.addAttribute("image", image);
-            //model.addAttribute("tags", tags);
+            model.addAttribute("tags", tags);
             return "images/edit";
         }else{
             redirectAttributes.addFlashAttribute("editError", true);
@@ -227,7 +227,9 @@ public class ImageController {
     //Returns the string
     private String convertTagsToString(List<Tag> tags) {
         StringBuilder tagString = new StringBuilder();
-
+        if(tags.size() == 0) {
+            return "";
+        }
         for (int i = 0; i <= tags.size() - 2; i++) {
             tagString.append(tags.get(i).getName()).append(",");
         }
