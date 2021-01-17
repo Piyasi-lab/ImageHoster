@@ -1,5 +1,6 @@
 package ImageHoster.controller;
 
+import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import ImageHoster.model.Tag;
 import ImageHoster.model.User;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.*;
 
 @Controller
@@ -36,6 +38,31 @@ public class ImageController {
         return "images";
     }
 
+    /**
+     * this method adds new comment to an existing image
+     * @param imageId
+     * @param comment
+     * @param session
+     * @return redirects back to image.html
+     */
+    @RequestMapping(value = "/image/{imageId}/comments", method = RequestMethod.POST)
+    public String newComment(@PathVariable("imageId") int imageId, String comment, HttpSession session) {
+        Image image = imageService.getImage(imageId);
+        // redirect to images page if image not found
+        if(null == image) {
+            return "redirect:/images";
+        }
+        Comment newComment = new Comment();
+        newComment.setText(comment);
+        newComment.setCreatedDate(LocalDate.now());
+        User currentUser = (User) session.getAttribute("loggeduser");
+        newComment.setUser(currentUser);
+        newComment.setImage(image);
+        image.getComments().add(newComment);
+        imageService.updateImage(image);
+        return "redirect:/images/" + imageId;
+    }
+
     //This method is called when the details of the specific image with corresponding imageId are to be displayed
     //The logic is to get the image from the databse with corresponding imageId. After getting the image from the database the details are shown
     //First receive the dynamic parameter in the incoming request URL in a int variable 'imageId' and also the Model type object
@@ -51,6 +78,7 @@ public class ImageController {
         Image image = imageService.getImage(imageId);
         model.addAttribute("image", image);
         model.addAttribute("tags", image.getTags());
+        model.addAttribute("comments",image.getComments());
         return "images/image";
     }
 
